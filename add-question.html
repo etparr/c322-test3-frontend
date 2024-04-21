@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="navbar.css">
   <link rel="stylesheet" href="general.css">
   <link rel="stylesheet" href="cards.css">
-  <script src="configuration.js" defer></script>
 </head>
 
 <body>
@@ -49,6 +48,8 @@
 
   <div id="list" class="cards"></div>
 
+  <script src="configuration.js"></script>
+
   <script>
     let host = "http://localhost:8080";
     let questions = [];
@@ -71,38 +72,72 @@
       }
     }
 
+    async function loadImage(questionId) {
+      const headers = {
+        "Authorization": "Bearer " + configuration.token(),
+        "Content-Type": "application/json"
+      };
+
+      const response = await fetch(`${host}/questions/${questionId}/image`, { headers });
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        return url;
+      } else {
+        console.error('Failed to load image');
+        return '';
+      }
+    }
+
+    async function displayImage(questionId) {
+      const imageUrl = await loadImage(questionId);
+      document.getElementById('questionImage' + questionId).src = imageUrl;
+    }
+
+
     async function displayTheQuestions() {
       if (questions.length == 0) {
         questions = await getAll();
       }
-
-      let list = document.getElementById("list");
       list.innerHTML = "";
-
       for (let question of questions) {
         let div = document.createElement("div");
+        div.id = `${question.id}`;
+        div.onclick = function () {
+          if (div.parentNode.id == "list") {
+            quiz.appendChild(div);
+            quizQuestions.push(div.id);
+          } else {
+            list.appendChild(div);
+            const index = quizQuestions.indexOf(div.id);
+            quizQuestions.splice(index, 1);
+          }
+          let n = quiz.childElementCount;
+          quizHeader.innerText = `The new quiz(${n} questions)`;
+          console.log(quizQuestions);
+        };
         div.className = "card";
         let innerHtml = `
-         
-        <img src="http://localhost:8080/questions/${question.id}/image" alt="question" style="width:100%">
-        <div class="container">
-          <h4><b>${question.id}</b></h4> 
-          <p>${question.description}</p>
-          <form>
-              <input type="radio" id="q${question.id}ptionA" name="q2Answer" value="A">
-              <label for="q${question.id}ptionA">${question.choices[0]}</label><br>
+       
+        <img id="questionImage${question.id}" src="" alt="question" style="width:100%">      <div class="container">
+        <h4><b>${question.id}</b></h4> 
+        <p>${question.description}</p>
+        <form>
+            <input type="radio" id="q${question.id}ptionA" name="q2Answer" value="A">
+            <label for="q${question.id}ptionA">${question.choices[0]}</label><br>
 
-              <input type="radio" id="q${question.id}ptionB" name="q2Answer" value="B">
-              <label for="q${question.id}ptionB">${question.choices[1]}</label><br>
+            <input type="radio" id="q${question.id}ptionB" name="q2Answer" value="B">
+            <label for="q${question.id}ptionB">${question.choices[1]}</label><br>
 
-              <input type="radio" id="q${question.id}ptionC" name="q2Answer" value="C">
-              <label for="q${question.id}ptionC">${question.choices[2]}</label><br>       
-          </form> 
-        </div>
-     
-            `;
+            <input type="radio" id="q${question.id}ptionC" name="q2Answer" value="C">
+            <label for="q${question.id}ptionC">${question.choices[2]}</label><br>       
+        </form> 
+      </div>
+   
+          `;
         div.innerHTML = innerHtml;
         list.appendChild(div);
+        displayImage(question.id);
       }
     }
 

@@ -50,6 +50,10 @@
     let quizId = null;
     let quizQuestions = [];
 
+    document.getElementById("quizTitle").addEventListener("input", function () {
+      updateQuizHeading();
+    });
+
     displayTheQuestions();
 
     async function getAll() {
@@ -87,9 +91,9 @@
     }
 
     async function displayImage(questionId) {
-    const imageUrl = await loadImage(questionId);
-    document.getElementById('questionImage' + questionId).src = imageUrl;
-}
+      const imageUrl = await loadImage(questionId);
+      document.getElementById('questionImage' + questionId).src = imageUrl;
+    }
 
 
     async function displayTheQuestions() {
@@ -137,13 +141,14 @@
         displayImage(question.id);
       }
     }
-    
+
     function updateQuizHeading() {
-    const quizTitle = document.getElementById("quizTitle").value.trim();
-    const questionCount = selectedQuestions.length;
-    const headingText = quizTitle ? `${quizTitle} (${questionCount} questions)` : `The New Quiz (${questionCount} questions)`;
-    document.getElementById("quizHeading").innerText = headingText;
-  }
+      const quizTitle = document.getElementById("quizTitle").value.trim();
+      const questionCount = quizQuestions.length;
+      const headingText = quizTitle ? `${quizTitle} (${questionCount} questions)` : `The New Quiz (${questionCount} questions)`;
+      document.getElementById("quizHeader").innerText = headingText;
+    }
+
     async function saveTheQuiz() {
       let quizTitle = document.getElementById("quizTitle").value;
       let endpoint = "";
